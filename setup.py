@@ -25,7 +25,5 @@ setuptools.setup(
         ]
     },
     install_requires=requirement_lines,
-    extras_require={
-        'dev': dev_requirement_lines
-    }
+    extras_require={'dev': dev_requirement_lines},
 )
