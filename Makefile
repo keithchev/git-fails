@@ -3,7 +3,7 @@ init:
 
 lint:
 	flake8 ./ --count --statistics --exit-zero
-	python -m pylint gitfail
+	python -m pylint gitfails
 
 pre-commit:
 	pre-commit run --all-files

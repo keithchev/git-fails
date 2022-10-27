@@ -13,15 +13,15 @@ with dev_requirements_file.open('r') as fh:
     dev_requirement_lines = fh.readlines()
 
 setuptools.setup(
-    name='gitfail',
+    name='gitfails',
     description='Set up common git fails',
-    url='https://github.com/keithchev/git-fail',
+    url='https://github.com/keithchev/git-fails',
     packages=setuptools.find_packages(),
-    python_requires='>3.8',
+    python_requires='>3.9',
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'gitfail = gitfail.cli.main:main',
+            'gitfails = gitfails.cli.cli:main',
         ]
     },
     install_requires=requirement_lines,
