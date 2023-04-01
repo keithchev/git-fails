@@ -14,14 +14,14 @@ with dev_requirements_file.open('r') as fh:
 
 setuptools.setup(
     name='gitfails',
-    description='Set up common git fails',
+    description='Mock common troublesome git scenarios',
     url='https://github.com/keithchev/git-fails',
     packages=setuptools.find_packages(),
-    python_requires='>3.9',
+    python_requires='~=3.10',
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'gitfails = gitfails.cli.cli:main',
+            'gitfails = gitfails.cli.cli:cli',
         ]
     },
     install_requires=requirement_lines,

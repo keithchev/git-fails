@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 95
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py310']
 include = '\.pyi?$'
 skip-string-normalization = true
 extend-exclude = '^/(deploy|docs|ignore|legacy|notebooks)'
