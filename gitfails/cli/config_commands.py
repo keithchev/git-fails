@@ -25,6 +25,7 @@ def set_working_dir(path):
     config = read_config()
     config['working_dir'] = str(pathlib.Path(path).expanduser().resolve())
 
-    logger.info('Set working directory to %s' % config['working_dir'])
     os.makedirs(config['working_dir'], exist_ok=True)
     write_config(config)
+
+    click.echo('Set working directory to %s' % config['working_dir'])

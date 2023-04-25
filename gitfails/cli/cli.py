@@ -35,7 +35,7 @@ def init():
     Top-level initialization and setup
     '''
     init_config()
-    logger.info('Initialized config file')
+    click.echo('Initialized config file')
 
 
 config_commands.add_command(view_config, 'view')
