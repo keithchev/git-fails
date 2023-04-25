@@ -11,16 +11,18 @@ pip install -e ."[dev]"
 
 
 ## Usage
-The top-level command is `gitfails`
+The top-level command is `gitfails`.
+
+The first time the CLI is used, call `gitfail init` to initialize configuration settings.
+
+### Set the directory in which repos are created
+```
+gitfails config set-working-dir <path/to/working/dir>
+```
 
 ### List pre-defined scenarios
 ```
-gitfails sc list
-```
-
-### Set the top-level working directory (in which repos are created)
-```
-gitfails set-working-dir <path/to/working/dir>
+gitfails sc ls
 ```
 
 ### Construct a scenario
@@ -31,5 +33,5 @@ gitfails sc create <name>
 ### Cleanup by removing all scenarios
 WARNING: this deletes all repos/files in the working directory.
 ```
-gitfails cleanup
+gitfails sc remove
 ```

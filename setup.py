@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from pathlib import Path
-
 import setuptools
 
 requirements_file = Path(__file__).parent / 'requirements.txt'

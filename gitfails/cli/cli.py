@@ -1,7 +1,9 @@
 import click
 
 from gitfails import logger
-from gitfails.cli.sc_commands import sc_create, sc_list
+from gitfails.cli.config_commands import reset_config, set_working_dir, view_config
+from gitfails.cli.sc_commands import create_scenario, delete_scenarios, list_scenarios
+from gitfails.config import init_config, read_config
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -15,35 +17,36 @@ def cli(ctx):
 
 @click.group()
 @click.pass_context
-def sc(ctx):
+def scenario_commands(ctx):
     """Scenario commands"""
     pass
 
 
-@click.command()
-@click.argument('path')
-def set_working_dir(path):
-    """Set the top-level working directory (in which repos are created)"""
-    logger.info('Setting working directory to %s' % path)
+@click.group()
+@click.pass_context
+def config_commands(ctx):
+    """config commands"""
+    pass
 
 
 @click.command()
-def cleanup():
-    """
-    Cleanup by removing all scenarios
-
-    WARNING: this deletes all repos/files in the working directory.
-    """
-    logger.info('Deleting all repos from working directory')
-
-
-cli.add_command(set_working_dir)
-cli.add_command(cleanup)
-
-sc.add_command(sc_list, 'list')
-sc.add_command(sc_create, 'create')
-cli.add_command(sc)
+def init():
+    '''
+    Top-level initialization and setup
+    '''
+    init_config()
+    logger.info('Initialized config file')
 
 
-if __name__ == '__main__':
-    cli()
+config_commands.add_command(view_config, 'view')
+config_commands.add_command(reset_config, 'reset')
+config_commands.add_command(set_working_dir)
+
+scenario_commands.add_command(list_scenarios, 'ls')
+scenario_commands.add_command(create_scenario, 'create')
+scenario_commands.add_command(delete_scenarios, 'remove')
+
+cli.add_command(config_commands, 'config')
+cli.add_command(scenario_commands, 'sc')
+
+cli.add_command(init)
