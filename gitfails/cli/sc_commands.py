@@ -25,7 +25,9 @@ def create_scenario(name, overwrite):
         click.echo("Invalid scenario name: '%s'" % name)
         return
 
-    dirpath = lambda ind: pathlib.Path(read_config()['working_dir']) / f'{name}-{ind}'
+    def dirpath(ind):
+        return pathlib.Path(read_config()['working_dir']) / f'{name}-{ind}'
+
     ind = 1
     if not overwrite:
         while os.path.exists(dirpath(ind)):

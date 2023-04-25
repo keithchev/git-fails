@@ -4,8 +4,10 @@ repos:
     rev: v2.3.0
     hooks:
     -   id: check-yaml
+    -   id: check-json
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+    -   id: double-quote-string-fixer
     -   id: flake8
         args: [--statistics]
 

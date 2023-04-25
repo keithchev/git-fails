@@ -13,11 +13,8 @@ class Scenario(abc.ABC):
             if os.path.exists(self.dirpath):
                 shutil.rmtree(self.dirpath)
 
-    def __repr__(self):
-        return f'<Scenario {self.name}>'
-
     @abc.abstractmethod
-    def construct():
+    def construct(self):
         raise NotImplementedError
 
 

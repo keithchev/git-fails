@@ -5,14 +5,8 @@ ignore =
     E203,
     # line break before a binary operator
     W503,
-    # mccabe complexity test
-    C901,
     # unused imports
     F401,
-    # too many blank lines
-    E303,
-    # # blank line at end of file
-    W391,
     # continuation line under-indented for visual indent
     # (forces indentation to opening parentheses if anything appears on the first line)
     E128,
@@ -25,5 +19,5 @@ exclude =
     notebooks,
     ignore,
     tests/artifacts
-max-line-length = 95
+max-line-length = 99
 max-complexity = 18

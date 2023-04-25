@@ -12,3 +12,7 @@ default_section = "THIRDPARTY"
 ensure_newline_before_comments = true
 no_lines_before = ["STDLIB", "THIRDPARTY"]
 lines_between_types = 1
+
+
+[tool.pytest.ini_options]
+log_cli = false
