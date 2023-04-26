@@ -17,7 +17,7 @@ def create_file_and_commit(repo, filename, content, message, overwrite=False):
         file.write(content)
 
     repo.index.add([filename])
-    author = git.Actor("Author Name", "author@example.com")
+    author = git.Actor('Author Name', 'author@example.com')
     repo.index.commit(message, author=author)
 
 
