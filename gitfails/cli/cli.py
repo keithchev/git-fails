@@ -39,6 +39,7 @@ def init():
 
 
 config_commands.add_command(view_config, 'view')
+config_commands.add_command(view_config, 'show')
 config_commands.add_command(reset_config, 'reset')
 config_commands.add_command(set_working_dir)
 

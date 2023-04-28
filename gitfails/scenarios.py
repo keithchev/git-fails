@@ -32,20 +32,26 @@ class TwoFeatureBranches(Scenario):
 
     def construct(self):
         ''' '''
+        author = 'Developer 1'
         repo_dirpath = self.dirpath / 'repo'
         repo = create_repo(repo_dirpath)
 
         # create a file on the main branch and commit
         create_file_and_commit(
-            repo, filename='file1.txt', content='Initial content\n', message='Initial commit'
+            repo,
+            author,
+            filename='file1.txt',
+            content='Initial content',
+            message='Initial commit',
         )
 
         # create branch A, add a file, and commit
         create_branch_and_checkout(repo, 'A')
         create_file_and_commit(
             repo,
+            author,
             filename='file2.txt',
-            content='Content from branch A\n',
+            content='Content from branch A',
             message='Commit on branch A',
         )
 
@@ -54,8 +60,9 @@ class TwoFeatureBranches(Scenario):
         create_branch_and_checkout(repo, 'B')
         create_file_and_commit(
             repo,
+            author,
             filename='file3.txt',
-            content='Content from branch B\n',
+            content='Content from branch B',
             message='Commit on branch B',
         )
 
@@ -79,29 +86,32 @@ class ForcePushSharedBranch(Scenario):
         origin_repo = create_repo(self.dirpath / 'origin')
         create_file_and_commit(
             origin_repo,
+            author='maintainers',
             filename='file1.txt',
-            content='Initial content\n',
-            message='Initial commit to main',
+            content='Initial content',
+            message='Initial commit',
         )
         create_file_and_commit(
             origin_repo,
+            author='maintainers',
             filename='file1.txt',
-            content='Modified content\n',
-            message='Second commit to main',
+            content='Modified content',
+            message='Second commit',
             overwrite=True,
         )
 
-        # clone the origin repo to represent the good and bad dev repos
+        # clone the origin repo to represent local repos of two developers
         bad_dev_repo = origin_repo.clone(self.dirpath / 'bad_dev')
         good_dev_repo = origin_repo.clone(self.dirpath / 'good_dev')
 
-        # create a branch on the bad-dev repo and push it to the origin
+        # the bad dev creates a `dev` branch, makes a commit, and pushes to the origin
         create_branch_and_checkout(bad_dev_repo, 'dev')
         create_file_and_commit(
             bad_dev_repo,
+            author='bad-dev',
             filename='file2.txt',
-            content='Change from the bad-dev repo\n',
-            message='Commit from the bad-dev',
+            content='some new feature',
+            message='add new feature',
         )
         bad_dev_repo.remotes.origin.push('dev')
 
@@ -109,9 +119,10 @@ class ForcePushSharedBranch(Scenario):
         # (this represents ongoing changes from, e.g., merged PRs)
         create_file_and_commit(
             origin_repo,
+            author='maintainers',
             filename='file1.txt',
-            content='Modified content again\n',
-            message='Third commit to main',
+            content='Modified content again',
+            message='Third commit',
             overwrite=True,
         )
 
@@ -121,28 +132,24 @@ class ForcePushSharedBranch(Scenario):
         bad_dev_repo.git.checkout('main')
         bad_dev_repo.remotes.origin.pull('main')
 
-        # fetch the dev branch in the good-dev repo and add a new commit (but do not push)
+        # the good dev fetches the dev branch and adds a new commit to modify the feature
         good_dev_repo.remotes.origin.fetch()
         good_dev_repo.git.checkout('dev')
         create_file_and_commit(
             good_dev_repo,
+            author='good-dev',
             filename='file2.txt',
-            content='Change from good-dev repo\n',
-            message='Commit from the good dev',
+            content='some modified new feature',
+            message='modified new feature',
+            overwrite=True,
         )
 
-        # rebase the dev branch on the updated main branch in the bad-dev repo and force-push it
+        # the bad dev rebases their dev branch on the updated main branch and force-pushes it
         bad_dev_repo.git.checkout('dev')
         bad_dev_repo.git.rebase('main')
         bad_dev_repo.remotes.origin.push('dev', force=True)
 
-        # fetch and checkout the dev branch in the good-dev repo,
+        # the good dev fetches and checkouts out the dev branch
         # which because of the force-push has now diverged from the remote dev branch
         good_dev_repo.remotes.origin.fetch()
         good_dev_repo.git.checkout('dev')
-
-
-scenario_classes = {
-    ScenarioSubclass.__name__: ScenarioSubclass
-    for ScenarioSubclass in Scenario.__subclasses__()
-}

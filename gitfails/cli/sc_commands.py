@@ -5,7 +5,12 @@ import click
 
 from gitfails import logger, utils
 from gitfails.config import read_config
-from gitfails.scenarios import scenario_classes
+from gitfails.scenarios import Scenario
+
+scenario_classes = {
+    ScenarioSubclass.__name__: ScenarioSubclass
+    for ScenarioSubclass in Scenario.__subclasses__()
+}
 
 
 @click.command()
@@ -17,8 +22,8 @@ def list_scenarios():
 
 @click.command()
 @click.argument('name')
-@click.option('overwrite', '-o', '--overwrite', is_flag=True, default=False)
-def create_scenario(name, overwrite):
+@click.option('new', '-n', '--new', is_flag=True, default=False)
+def create_scenario(name, new):
 
     class_name = utils.snake_case_to_camel_case(name.replace('-', '_'))
     if class_name not in scenario_classes.keys():
@@ -29,12 +34,12 @@ def create_scenario(name, overwrite):
         return pathlib.Path(read_config()['working_dir']) / f'{name}-{ind}'
 
     ind = 1
-    if not overwrite:
+    if new:
         while os.path.exists(dirpath(ind)):
             ind += 1
 
     ScenarioClass = scenario_classes[class_name]
-    scenario = ScenarioClass(dirpath(ind), overwrite=overwrite)
+    scenario = ScenarioClass(dirpath(ind), overwrite=(not new))
     scenario.construct()
     click.echo('Created scenario %s at %s' % (name, dirpath(ind)))
 

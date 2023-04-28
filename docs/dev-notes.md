@@ -1,13 +1,8 @@
 # Dev docs/notes
 
-## Design TODOs
-- decide on the minimal repo file structure
-- for each scenario, set up a local and remote repo
+## TODOs
+- add type hints and mypy
 - create a minimal realistic example of a merge conflict that can be applied to any file in any pair of repos
-- define common operations that involve multiple git commands (e.g., add-and-commit)
-
-## Infra todos
-- add type hints, mypy config, add mypy to pre-commit etc
 
 
 ## Troublesome real-world scenarios
