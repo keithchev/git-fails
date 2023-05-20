@@ -6,13 +6,14 @@
 
 
 ## Troublesome real-world scenarios
-### Updating local remote-tracking branches after force-pushed changes
-A remote repo is cloned on a prod server and an existing `prod` branch is checked out. Later, bug fixes are made in a local dev repo and committed directly to main. The local `prod` branch is rebased on main and then force-pushed to the remote. How can the prod server's remote-tracking `prod` branch be updated to reflect the force-pushed changes? The intuitive answer might be to use `git pull --force` (assuming it to behave symmetrically as `git push --force`) but this does not work as expected - it ends up generating a merge commit.
+### Updating local branches after force-pushed changes
 
-
-## Conceptual questions/issues
 ### Cherry-picking a single commit that involves a merge conflict
 
+### Rebasing a local feature branch on main after a squash merge
+The feature branch retains the individual commits that were squashed during the merge, so naive interactive rebasing involves resolving conflicts as each of the squashed commits is replayed on top of main. 
+
+## Conceptual questions/issues
 ### Remote-tracking branches
 How are remote-tracking branches different from 'normal' local branches? Can they be set up manually (e.g. without using `git push --set-upstream` or `git checkout --track origin/$some_branch`)?
 
@@ -20,7 +21,7 @@ How are remote-tracking branches different from 'normal' local branches? Can the
 How is 'ours' and 'theirs' (or, in vs code, 'current' and 'incoming') defined when rebasing with `--onto`?
 
 ### 'Moving' branches
-Branches are just pointers to commits, so what's the best way to 'move' a pointer to a different commit? Is there a manual way to do this by editing some internal git object?
+What are all of the different ways to 'move' a branch to a different commit? Is there a manual way to do this by editing some internal git object? After moving a branch, how can orphaned commits be retrieved/viewed?
 
 ### Examples illustrating usage and pitfalls of git reset, checkout, switch, and restore
 The context is that git reset and git checkout were too overloaded, so git switch and git restore were introduced.
