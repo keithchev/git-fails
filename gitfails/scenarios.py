@@ -153,3 +153,67 @@ class ForcePushSharedBranch(Scenario):
         # which because of the force-push has now diverged from the remote dev branch
         good_dev_repo.remotes.origin.fetch()
         good_dev_repo.git.checkout('dev')
+
+
+class DivergedCommitHistories(Scenario):
+    """
+    Suppose there are two remote repos that, initially, have the same commit history.
+    One repo resembles a fork of the other, so we call the first repo the 'upstream'
+    and the second repo the 'fork', though there is no explicit relationship between the two.
+
+    At some point, the commit histories of the two repos diverge when different developers
+    push a series of different commits to each repo.
+    However, most or even all of the changes made to the upstream repo are also made to the fork,
+    but in a different order and with some additional changes mixed in.
+
+    Later, we want to diff the two repos to see what changes were made to the upstream repo
+    that were not made to the fork, and vice versa.
+    If the fork includes all of the changes made to the upstream,
+    then we expect the diff to be empty and we can say that the fork is up to date
+    even though it has a different commit history.
+
+    We also want to understand how git will handle merging the upstream into the fork
+    (or vice versa).
+
+    One specific question: suppose a line or file was added in the fork,
+    but not in the upstream. If the upstream is merged into the fork,
+    will the new line or file be deleted? If not, why not?
+
+    Anecdotally, it is possible for the fork to be up-to-date with the upstream
+    but for merge conflicts to still occur when merging the upstream into the fork
+    (even though the eventual merge is a no-op).
+    """
+
+    def construct(self):
+        # Create the upstream repo and add initial commits
+        upstream_repo = create_repo(self.dirpath / 'upstream')
+        self._add_commits(
+            upstream_repo,
+            author='original-dev',
+            num_commits=3,
+            filename_prefix='some_file',
+        )
+
+        # Clone the upstream to create a fork
+        fork_repo = upstream_repo.clone(self.dirpath / 'fork')
+
+        # Add diverging commits to upstream
+        self._add_commits(
+            upstream_repo,
+            author='external-dev',
+            num_commits=3,
+            filename_prefix='some_new_file',
+        )
+
+        # Add diverging commits to fork, including some changes similar to upstream
+        self._add_commits(
+            fork_repo, author='fork-dev', num_commits=3, filename_prefix='fork_diverge'
+        )
+        self._add_similar_commits(fork_repo, upstream_repo, author='fork-dev')
+
+    def _add_commits(self, repo, author, num_commits, filename_prefix):
+        for ind in range(num_commits):
+            filename = f'{filename_prefix}_{ind}.txt'
+            content = f'Content for {filename}, created by {author}'
+            message = f'Commit {ind} by {author}'
+            create_file_and_commit(repo, author, filename, content, message)
