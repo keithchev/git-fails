@@ -3,7 +3,12 @@ import os
 import shutil
 
 from gitfails import utils
-from gitfails.actions import create_branch_and_checkout, create_file_and_commit, create_repo
+from gitfails.actions import (
+    create_branch_and_checkout,
+    create_file_and_commit,
+    create_repo,
+    modify_file_and_commit,
+)
 
 
 class Scenario(abc.ABC):
@@ -91,7 +96,7 @@ class ForcePushSharedBranch(Scenario):
             content='Initial content',
             message='Initial commit',
         )
-        create_file_and_commit(
+        modify_file_and_commit(
             origin_repo,
             author='maintainers',
             filename='file1.txt',
@@ -117,7 +122,7 @@ class ForcePushSharedBranch(Scenario):
 
         # create a new commit directly on `main` in the origin
         # (this represents ongoing changes from, e.g., merged PRs)
-        create_file_and_commit(
+        modify_file_and_commit(
             origin_repo,
             author='maintainers',
             filename='file1.txt',
@@ -135,7 +140,7 @@ class ForcePushSharedBranch(Scenario):
         # the good dev fetches the dev branch and adds a new commit to modify the feature
         good_dev_repo.remotes.origin.fetch()
         good_dev_repo.git.checkout('dev')
-        create_file_and_commit(
+        modify_file_and_commit(
             good_dev_repo,
             author='good-dev',
             filename='file2.txt',
