@@ -4,9 +4,12 @@ import shutil
 
 from gitfails import utils
 from gitfails.actions import (
+    commit_files,
     create_branch_and_checkout,
+    create_file,
     create_file_and_commit,
     create_repo,
+    modify_file,
     modify_file_and_commit,
 )
 
@@ -86,7 +89,6 @@ class ForcePushSharedBranch(Scenario):
     '''
 
     def construct(self):
-
         # set up the remote/origin repo
         origin_repo = create_repo(self.dirpath / 'origin')
         create_file_and_commit(
@@ -190,35 +192,64 @@ class DivergedCommitHistories(Scenario):
     """
 
     def construct(self):
-        # Create the upstream repo and add initial commits
+        '''
+        create two repos, one upstream and one fork, with diverging commit histories
+        '''
+        # create the upstream repo and add initial commits
         upstream_repo = create_repo(self.dirpath / 'upstream')
-        self._add_commits(
+
+        # create some initial commits
+        create_file_and_commit(
             upstream_repo,
             author='original-dev',
-            num_commits=3,
-            filename_prefix='some_file',
+            filename='README.md',
+            content='This is the readme',
+            message='Initial commit',
+        )
+        create_file_and_commit(
+            upstream_repo,
+            author='original-dev',
+            filename='script.py',
+            content='This is some source code.',
+            message='add script.py',
         )
 
-        # Clone the upstream to create a fork
-        fork_repo = upstream_repo.clone(self.dirpath / 'fork')
+        # clone the upstream to create a fork
+        forked_repo = upstream_repo.clone(self.dirpath / 'fork')
 
-        # Add diverging commits to upstream
-        self._add_commits(
+        # rename the upstream remote to 'upstream'
+        forked_repo.git.remote('rename', 'origin', 'upstream')
+
+        # now an external dev modifies a file in the upstream
+        upstream_modification_to_script = 'This is some modified source code.'
+        modify_file_and_commit(
             upstream_repo,
             author='external-dev',
-            num_commits=3,
-            filename_prefix='some_new_file',
+            filename='script.py',
+            content=upstream_modification_to_script,
+            message='modify script.py',
+            overwrite=True,
         )
 
-        # Add diverging commits to fork, including some changes similar to upstream
-        self._add_commits(
-            fork_repo, author='fork-dev', num_commits=3, filename_prefix='fork_diverge'
+        # in the same commit on the fork, create a new file and modify the existing file
+        # to match the changes made to the upstream
+        create_file(
+            forked_repo, filename='new_script.py', content='This is some new source code.'
         )
-        self._add_similar_commits(fork_repo, upstream_repo, author='fork-dev')
+        modify_file(
+            forked_repo,
+            filename='script.py',
+            content=upstream_modification_to_script,
+            overwrite=True,
+        )
+        commit_files(
+            forked_repo,
+            author='internal-dev',
+            filenames=['new_script.py', 'script.py'],
+            message='add new_script.py and modify script.py',
+        )
 
-    def _add_commits(self, repo, author, num_commits, filename_prefix):
-        for ind in range(num_commits):
-            filename = f'{filename_prefix}_{ind}.txt'
-            content = f'Content for {filename}, created by {author}'
-            message = f'Commit {ind} by {author}'
-            create_file_and_commit(repo, author, filename, content, message)
+        # now attempt to merge the upstream main into the fork main
+        # (this will fail with a merge conflict)
+        forked_repo.git.checkout('main')
+        forked_repo.git.merge('upstream/main', '--no-commit', '--no-ff')

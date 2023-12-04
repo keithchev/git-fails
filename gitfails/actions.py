@@ -1,5 +1,10 @@
 import os
+import pathlib
 import git
+
+
+def email_from_author_name(author_name):
+    return f'{author_name}@some-domain.com'
 
 
 def create_repo(repo_dirpath):
@@ -18,23 +23,52 @@ def create_branch_and_checkout(repo, branch_name):
 
 def commit_file(repo, author, filename, message):
     repo.index.add([filename])
-    author = git.Actor(name=author, email=f'{author}@some-domain.com')
+    author = git.Actor(name=author, email=email_from_author_name(author))
     repo.index.commit(message, author=author)
+
+
+def commit_files(repo, author, filenames, message):
+    repo.index.add(filenames)
+    author = git.Actor(name=author, email=email_from_author_name(author))
+    repo.index.commit(message, author=author)
+
+
+def create_file(repo, filename, content):
+    '''
+    create a new file
+    '''
+    filepath = pathlib.Path(repo.working_tree_dir, filename)
+    if filepath.exists():
+        raise ValueError(f'File {filepath} already exists')
+
+    if not content.endswith('\n'):
+        content += '\n'
+
+    with open(filepath, 'w') as file:
+        file.write(content)
+
+
+def modify_file(repo, filename, content, overwrite=False):
+    '''
+    modify an existing file (by either appending to or overwriting it)
+    '''
+    filepath = pathlib.Path(repo.working_tree_dir, filename)
+    if not filepath.exists():
+        raise ValueError(f'File {filepath} does not exist')
+
+    if not content.endswith('\n'):
+        content += '\n'
+
+    mode = 'w' if overwrite else 'a'
+    with open(filepath, mode) as file:
+        file.write(content)
 
 
 def create_file_and_commit(repo, author, filename, content, message):
     '''
     create a new file and commit it
     '''
-    if filename.exists():
-        raise ValueError(f'File {filename} already exists')
-
-    if not content.endswith('\n'):
-        content += '\n'
-
-    with open(os.path.join(repo.working_tree_dir, filename), 'w') as file:
-        file.write(content)
-
+    create_file(repo, filename, content)
     commit_file(repo, author, filename, message)
 
 
@@ -43,11 +77,5 @@ def modify_file_and_commit(repo, author, filename, content, message, overwrite=F
     modify an existing file (by either appending to or overwriting it)
     and commit the change
     '''
-    if not filename.exists():
-        raise ValueError(f'File {filename} does not exist')
-
-    mode = 'w' if overwrite else 'a'
-    with open(os.path.join(repo.working_tree_dir, filename), mode) as file:
-        file.write(content)
-
+    modify_file(repo, filename, content, overwrite=overwrite)
     commit_file(repo, author, filename, message)
