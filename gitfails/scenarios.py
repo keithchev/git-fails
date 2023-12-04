@@ -195,10 +195,9 @@ class DivergedCommitHistories(Scenario):
         '''
         create two repos, one upstream and one fork, with diverging commit histories
         '''
-        # create the upstream repo and add initial commits
         upstream_repo = create_repo(self.dirpath / 'upstream')
 
-        # create some initial commits
+        # create the readme as the first commit
         create_file_and_commit(
             upstream_repo,
             author='original-dev',
@@ -206,50 +205,50 @@ class DivergedCommitHistories(Scenario):
             content='This is the readme',
             message='Initial commit',
         )
+
+        # add a script
         create_file_and_commit(
             upstream_repo,
-            author='original-dev',
-            filename='script.py',
-            content='This is some source code.',
-            message='add script.py',
+            author="original-dev",
+            filename="script.py",
+            content="inital content",
+            message="add script.py",
         )
 
-        # clone the upstream to create a fork
+        # clone the upstream to create a fork and, for clarity, rename the remote to 'upstream'
         forked_repo = upstream_repo.clone(self.dirpath / 'fork')
-
-        # rename the upstream remote to 'upstream'
         forked_repo.git.remote('rename', 'origin', 'upstream')
 
-        # now an external dev modifies a file in the upstream
-        upstream_modification_to_script = 'This is some modified source code.'
+        # now an external dev adds a new line to the script and commits to the upstream
+        new_line_added_by_external_dev = "new line added by external dev"
         modify_file_and_commit(
             upstream_repo,
-            author='external-dev',
-            filename='script.py',
-            content=upstream_modification_to_script,
-            message='modify script.py',
-            overwrite=True,
+            author="external-dev",
+            filename="script.py",
+            content=new_line_added_by_external_dev,
+            message="modify script.py",
+            overwrite=False,
         )
 
-        # in the same commit on the fork, create a new file and modify the existing file
-        # to match the changes made to the upstream
-        create_file(
-            forked_repo, filename='new_script.py', content='This is some new source code.'
+        # subsequently, an internal dev modifies the script in the fork
+        # by both adding the line added in the upstream and another new line
+        internal_addition_to_script = "\n".join(
+            [
+                "new line added by internal dev",
+                new_line_added_by_external_dev,
+            ]
         )
-        modify_file(
+        modify_file_and_commit(
             forked_repo,
-            filename='script.py',
-            content=upstream_modification_to_script,
-            overwrite=True,
-        )
-        commit_files(
-            forked_repo,
-            author='internal-dev',
-            filenames=['new_script.py', 'script.py'],
-            message='add new_script.py and modify script.py',
+            author="internal-dev",
+            filename="script.py",
+            content=internal_addition_to_script,
+            message="modify script.py",
+            overwrite=False,
         )
 
-        # now attempt to merge the upstream main into the fork main
-        # (this will fail with a merge conflict)
-        forked_repo.git.checkout('main')
-        forked_repo.git.merge('upstream/main', '--no-commit', '--no-ff')
+        # now fetch the upstream in the fork and attempt to merge
+        # the upstream main into the fork main
+        forked_repo.remotes.upstream.fetch()
+        forked_repo.git.checkout("main")
+        forked_repo.git.merge("upstream/main", "--no-commit", "--no-ff")
