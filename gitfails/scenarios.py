@@ -219,7 +219,7 @@ class DivergedCommitHistories(Scenario):
         forked_repo = upstream_repo.clone(self.dirpath / 'fork')
         forked_repo.git.remote('rename', 'origin', 'upstream')
 
-        # now an external dev adds a new line to the script and commits to the upstream
+        # now an external dev adds a new line to the script in the upstream
         new_line_added_by_external_dev = "new line added by external dev"
         modify_file_and_commit(
             upstream_repo,
@@ -231,7 +231,8 @@ class DivergedCommitHistories(Scenario):
         )
 
         # subsequently, an internal dev modifies the script in the fork
-        # by both adding the line added in the upstream and another new line
+        # by adding the line added in the upstream and also another new line
+        # (nb the same result is obtained if these two lines are added in separate commits)
         internal_addition_to_script = "\n".join(
             [
                 "new line added by internal dev",
@@ -248,7 +249,9 @@ class DivergedCommitHistories(Scenario):
         )
 
         # now fetch the upstream in the fork and attempt to merge
-        # the upstream main into the fork main
+        # the upstream main into the fork main; a merge conflict should result
+        # because the commit histories of the fork and upstream have diverged,
+        # so git has no way to recognize that the fork is only ahead, not behind, the upstream
         forked_repo.remotes.upstream.fetch()
         forked_repo.git.checkout("main")
         forked_repo.git.merge("upstream/main", "--no-commit", "--no-ff")
